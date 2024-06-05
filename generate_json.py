@@ -94,7 +94,7 @@ if __name__ == "__main__":
     data["apps"] = []
 
     g = Github(token)
-    repo = g.get_repo("iStoreBox-Dev/IPAs")
+    repo = g.get_repo("swaggyP36000/TrollStore-IPAs")
     releases = repo.get_releases()
 
     for release in releases:
