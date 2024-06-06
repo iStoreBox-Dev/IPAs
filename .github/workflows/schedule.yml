@@ -24,8 +24,9 @@ jobs:
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          API_KEY: ${{ secrets.API_KEY }}
         run: |
-          python generate_json.py -t ${{ secrets.GITHUB_TOKEN }} -a ${{ secrets.IMG }}
+          python generate_json.py -t $GITHUB_TOKEN -a $API_KEY
       - uses: stefanzweifel/git-auto-commit-action@v4
         env: 
           EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}

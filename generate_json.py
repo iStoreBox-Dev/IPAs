@@ -87,8 +87,11 @@ def search_for_icon(app_name, developer_name, api_key):
     res = conn.getresponse()
     data = res.read()
     result = json.loads(data.decode("utf-8"))
+
     if "images" in result and len(result["images"]) > 0:
-        return result["images"][0]["url"]
+        first_image = result["images"][0]
+        if "url" in first_image:
+            return first_image["url"]
     return None
 
 
@@ -168,7 +171,10 @@ if __name__ == "__main__":
             if not download_icon(icon_url, icon_path):
                 search_icon_url = search_for_icon(app_name, dev_name, api_key)
                 if search_icon_url:
-                    download_icon(search_icon_url, icon_path)
+                    if download_icon(search_icon_url, icon_path):
+                        icon_url = search_icon_url
+                    else:
+                        print(f"Failed to download searched icon for {app_name}")
                 else:
                     print(f"Icon not found for {app_name}")
 
