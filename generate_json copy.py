@@ -2,7 +2,7 @@ import argparse
 import json
 import os
 from io import StringIO
-import requests
+
 import mistletoe
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -66,13 +66,6 @@ def transform_object(original_object):
     return transformed_object
 
 
-def download_icon(url, path):
-    response = requests.get(url)
-    if response.status_code == 200:
-        with open(path, 'wb') as f:
-            f.write(response.content)
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--token", help="Github token")
@@ -103,9 +96,6 @@ if __name__ == "__main__":
     g = Github(token)
     repo = g.get_repo("swaggyP36000/TrollStore-IPAs")
     releases = repo.get_releases()
-
-    if not os.path.exists("icons"):
-        os.makedirs("icons")
 
     for release in releases:
         print(release.title)
@@ -138,10 +128,6 @@ if __name__ == "__main__":
                     desc = f"{raw_desc}\nLast updated: {raw_last_updated}\nStatus: {raw_status}"
                     dev_name = f"{row['Source/Maintainer'].values[0]}"
 
-            icon_url = f"https://raw.githubusercontent.com/iStoreBox-Dev/IPAs/main/icons/{bundle_id}.png"
-            icon_path = os.path.join("icons", f"{bundle_id}.png")
-            download_icon(icon_url, icon_path)
-
             data["apps"].append(
                 {
                     "name": app_name,
@@ -152,7 +138,7 @@ if __name__ == "__main__":
                     "downloadURL": asset.browser_download_url,
                     "developerName": dev_name,
                     "localizedDescription": desc,
-                    "iconURL": icon_url,
+                    "iconURL": f"https://raw.githubusercontent.com/iStoreBox-Dev/IPAs/main/icons/{bundle_id}.png",
                 }
             )
 
