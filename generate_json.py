@@ -7,6 +7,7 @@ import mistletoe
 import pandas as pd
 from bs4 import BeautifulSoup
 from github import Github
+import http.client
 
 from get_bundle_id import get_single_bundle_id
 
@@ -71,13 +72,33 @@ def download_icon(url, path):
     if response.status_code == 200:
         with open(path, 'wb') as f:
             f.write(response.content)
+        return True
+    return False
+
+
+def search_for_icon(app_name, developer_name, api_key):
+    conn = http.client.HTTPSConnection("google.serper.dev")
+    payload = json.dumps({"q": f"{app_name} {developer_name} icon"})
+    headers = {
+        'X-API-KEY': api_key,
+        'Content-Type': 'application/json'
+    }
+    conn.request("POST", "/images", payload, headers)
+    res = conn.getresponse()
+    data = res.read()
+    result = json.loads(data.decode("utf-8"))
+    if "images" in result and len(result["images"]) > 0:
+        return result["images"][0]["url"]
+    return None
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--token", help="Github token")
+    parser.add_argument("-t", "--token", help="GitHub token")
+    parser.add_argument("-a", "--api_key", help="API key for image search")
     args = parser.parse_args()
     token = args.token
+    api_key = args.api_key
 
     with open("apps.json", "r") as f:
         data = json.load(f)
@@ -144,7 +165,12 @@ if __name__ == "__main__":
 
             icon_url = f"https://raw.githubusercontent.com/iStoreBox-Dev/IPAs/main/icons/{bundle_id}.png"
             icon_path = os.path.join("icons", f"{bundle_id}.png")
-            download_icon(icon_url, icon_path)
+            if not download_icon(icon_url, icon_path):
+                search_icon_url = search_for_icon(app_name, dev_name, api_key)
+                if search_icon_url:
+                    download_icon(search_icon_url, icon_path)
+                else:
+                    print(f"Icon not found for {app_name}")
 
             data["apps"].append(
                 {
